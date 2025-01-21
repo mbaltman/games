@@ -465,6 +465,30 @@ gameoverisshowing = false
 gameoverishiding = true
 gameoverisanimating = false 
 
+birdframes_offsets = {
+{70,71,72,71},
+{115,116,117,116},
+{99,100,101,100},
+{83,84,85,84},
+{67,68,69,68},
+{112,113,114,113},
+{96,97,98,97},
+{80,81,82,81},
+{64,65,66,65}
+}
+
+bf_offset = {
+1,
+1,
+4,
+2,
+3,
+2,
+4,
+1,
+1
+}
+
 function gamecompleted()
  music(4)
 	gameover = true
@@ -479,20 +503,60 @@ function drawgamecompleted()
 	map(0,16,0,0 - endoffset + 128,16,16)
 	map(33,0,0,0 - endoffset,16,16)
 
-	spr(72, bridflightoffset, 60)
-	spr(117, bridflightoffset - 8, 68)
-	spr(101, bridflightoffset - 8, 52)
-	spr(85, bridflightoffset - 16, 76)
-	spr(69, bridflightoffset - 16, 44)
-	spr(114, bridflightoffset - 24, 84)
-	spr(98, bridflightoffset - 24, 36)
-	spr(82, bridflightoffset - 32, 92)
-	spr(66, bridflightoffset - 32, 28)
+	spr(birdframes_offsets[1][flr(bf_offset[1])], bridflightoffset, 60)
+	spr(birdframes_offsets[2][flr(bf_offset[2])], bridflightoffset - 8, 68)
+	spr(birdframes_offsets[3][flr(bf_offset[3])], bridflightoffset - 8, 52)
+	spr(birdframes_offsets[4][flr(bf_offset[4])], bridflightoffset - 16, 76)
+	spr(birdframes_offsets[5][flr(bf_offset[5])], bridflightoffset - 16, 44)
+	spr(birdframes_offsets[6][flr(bf_offset[6])], bridflightoffset - 24, 84)
+	spr(birdframes_offsets[7][flr(bf_offset[7])], bridflightoffset - 24, 36)
+	spr(birdframes_offsets[8][flr(bf_offset[8])], bridflightoffset - 32, 92)
+	spr(birdframes_offsets[9][flr(bf_offset[9])], bridflightoffset - 32, 28)
 
  spr(240, 5,13,13,1)
 end
 
 function updategamecompleted()
+	bf_offset[1] += 0.3
+	if bf_offset[1] >= 5 then
+		bf_offset[1] = 1
+	end 
+	
+	bf_offset[2] += 0.2
+	if bf_offset[2] >= 5 then
+		bf_offset[2] = 1
+	end
+	
+	bf_offset[3] += 0.25
+	if bf_offset[3] >= 5 then
+		bf_offset[3] = 1
+	end
+	
+	bf_offset[4] += 0.3
+	if bf_offset[4] >= 5 then
+		bf_offset[4] = 1
+	end
+	bf_offset[5] += 0.35
+	if bf_offset[5] >= 5 then
+		bf_offset[5] = 1
+	end
+	bf_offset[6] += 0.3
+	if bf_offset[6] >= 5 then
+		bf_offset[6] = 1
+	end
+	bf_offset[7] += 0.25
+	if bf_offset[7] >= 5 then
+		bf_offset[7] = 1
+	end
+	bf_offset[8] += 0.3
+	if bf_offset[8] >= 5 then
+		bf_offset[8] = 1
+	end
+	bf_offset[9] += 0.35
+	if bf_offset[9] >= 5 then
+		bf_offset[9] = 1
+	end
+
 	if gameoverisshowing then 
 		if endoffset > 0 then
 		 	endoffset -= 1
