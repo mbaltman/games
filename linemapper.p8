@@ -3,10 +3,9 @@ version 42
 __lua__
 --liftime functions
 
-speed_multiplier = 20 
+speed_multiplier = 1
 
 function _init()
- --rectfill(0,0,124,124,0)
  init_line()
 end
 
@@ -58,12 +57,12 @@ function update_line()
 	
 	if delay == 0 then 
 	
-	 options_ranked = get_options(ci.x, ci.y)
+	 options_ranked = get_options(ci)
  
  	max_rank = 0
  	
  	for o in all(options_ranked) do 
-			o.rank  = count(get_options(o.x,o.y))
+			o.rank  = count(get_options(o))
 			if grid[o.x][o.y] == 1 then 
 			  o.rank += 3
 			end
@@ -85,6 +84,10 @@ function update_line()
  	end
  	
  	grid[ci.x][ci.y] = line_color
+ 	if fill_b then
+ 	  check_for_fill(ci, line_color) 
+ 	end
+ 	
  	ci = pickrnd(options_final)
  	delay = delay_constant
 	end
@@ -115,18 +118,10 @@ function increment_index()
  		line_highlight = next_color.h
 end
 
-function get_options(x,y) 
-		options_possible = {}
-	 add(options_possible, {x=x+1, y=y})
-		add(options_possible, {x=x-1, y=y})
-		add(options_possible, {x=x,   y=y+1})
-		add(options_possible, {x=x,   y=y-1})
+function get_options(p) 
 	 options_final = {}
- 	for o in all(options_possible) do 
-	 	if o.x > 0 and 
-	 	   o.x < 129 and
-	 				o.y > 0 and 
-	 				o.y < 129 then 
+ 	for o in all(get_neighbors(p)) do 
+	 	if inbounds(o) then 
 		 	if grid[o.x][o.y] != line_color then
 		 		add(options_final,o)  
 		 	end
@@ -156,6 +151,60 @@ function pickrnd(list)
  index = 1 + flr(rnd(length))
  return list[index]
 end
+
+function inbounds(p) 
+	if p.x > 0 and 
+		 	p.x < 129 and
+		 	p.y > 0 and 
+		 	p.y < 129 then
+		 	return true
+	end
+	return false
+end
+
+function print_t(t)
+	for x=1, count(t) do 
+		for y=1, count(t[x]) do
+			pset(x - 1, y - 1, t[x][y])
+		end
+	end
+end
+
+function get_neighbors(p)
+		x = p.x 
+		y = p.y
+		neighbors = {}
+	 add(neighbors, {x=x+1, y=y})
+	 add(neighbors, {x=x,   y=y+1})
+		add(neighbors, {x=x-1, y=y})
+		add(neighbors, {x=x,   y=y-1})
+		return neighbors
+end
+
+function merge_tables(t_1, t_2)
+	result = {}
+	
+	for v in all(t_1) do 
+		add(result,v)
+	end
+	
+	for v in all(t_2) do 
+		add(result,v)
+	end
+
+ return result 
+end
+
+function contains(t,v)
+ for v_in_t in all(t) do 
+ 	if v_in_t == v then 
+ 		return true 
+ 	end
+ end
+ 
+ return false
+
+end
 -->8
 -- cursor controller 
 
@@ -171,6 +220,96 @@ function draw_cursor()
 end
 -->8
 -- score manager 
+
+-->8
+--fill boundaries 
+fill_b = true 
+
+-- -1 not set yet 
+-- 0 no
+-- 1 yes 
+-- 2 in progress in call tree
+should_be_filled = {}
+
+-- changed point coordinate 
+function check_for_fill(point, c_index)
+	print("source point p.x"..point.x.."p.y"..point.y)
+ 
+ for x=1, 128 do 
+		should_be_filled[x] = {}
+		for y=1, 128 do 
+			should_be_filled[x][y] = -1
+		end
+	end
+	
+	should_be_filled[point.x][point.y] = 1
+	
+ for p in all(get_neighbors(point)) do
+ 	print("checking p.x"..p.x.."p.y"..p.y)
+ 	shouldfill = set_should_be_filled(p,c_index)
+ 	if shouldfill then 
+ 		print("yes! should fill")
+ 		start_fill(p, c_index)
+ 	end
+ end
+end
+
+function set_should_be_filled(
+p,
+c_index
+)
+ --	print("set should be filled p.x"..p.x.."p.y"..p.y)
+
+ --print_t(should_be_filled)
+
+	if not inbounds(p) then 
+		return false
+	end
+	
+	if grid[p.x][p.y] == c_index then 
+		should_be_filled[p.x][p.y] = 1
+		return true 
+	end
+	
+	if should_be_filled[p.x][p.y] != -1 then 
+		if should_be_filled[p.x][p.y] == 1 then 
+			return true 
+		else 
+		 return false	
+		end
+	end
+	
+	for n in all(get_neighbors(p)) do
+		if not set_should_be_filled(n, c_index) then
+			should_be_filled[p.x][p.y] = 0
+			return false 			
+		end
+	end
+	
+	should_be_filled[p.x][p.y] = 1
+	return true  
+end
+
+function start_fill(p, c_index)
+	print("start_fill p.x"..p.x.." p.y"..p.y)
+ if grid[p.x][p.y] == c_index then 
+   return 
+ end
+	grid[p.x][p.y] = c_index
+  
+	for n in all(get_neighbors(p)) do 
+		if not inbounds(n) then 
+			return 
+		end
+		
+		if grid[n.x][n.y] != c_index
+		then
+			start_fill(n, c_index)
+		end
+	end
+	
+end
+
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
